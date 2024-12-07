@@ -1,3 +1,4 @@
 cartopy
 matplotlib
 geopandas
+pygeo-cn

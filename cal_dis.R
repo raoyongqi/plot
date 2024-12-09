@@ -31,10 +31,36 @@ df[is.na(df)] <- 0
 
 # 计算 Severity
 df <- df %>%
-  mutate(Severity = (Disease_0*0 + Disease_1*1 + Disease_2*2 + Disease_3*3 + Disease_4*4 + Disease_5*5) /
-           (6 * (Disease_0 + Disease_1 + Disease_2 + Disease_3 + Disease_4 + Disease_5)))
+  mutate(
+      Severity = (Disease_0*0 + Disease_1*1 +Disease_2*2+Disease_3*3+ Disease_4*4+
+                    Disease_5*5)/
+        6/(Disease_0+Disease_1+Disease_2+Disease_3+Disease_4+Disease_5))
 
+df$PL <- df$Severity * df$Biomass
+
+
+
+
+Biomass_result <- aggregate(Biomass ~ ID, data = df, FUN = mean)
+
+PL_result <- aggregate(PL ~ ID, data = df, FUN = sum)
+
+# 合并两个数据框
+result <- merge(Biomass_result, PL_result, by = "ID")
+
+# 计算相除结果，并添加为新列
+result$Ratio <-result$PL/ result$Biomass 
+
+result$Prefix <- sub("-[^-]*$", "",result$ID)
+
+output_df  <- read.csv("data/output.csv")
+
+output_df$Renamed_ID <- gsub("hn-S", "HN", output_df$Site)
+# print(df)
 
 # 查看结果
+
+# 查看结果
+print(output_df)
 print(df)
 

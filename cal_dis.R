@@ -5,7 +5,7 @@
 #   groupby(Treatment,Site,plot) %>% summarise(PL= sum(Severity*species_biomass,na.rm=True)/mean(Plot_Biomass))
 
 # 分母是0？？
-
+rm(list=ls())
 # 加载 openxlsx 和 dplyr 包
 library(openxlsx)
 library(dplyr)
@@ -15,7 +15,7 @@ setwd("C:/Users/r/Desktop/work12")
 df <- read.xlsx("data/ruqinfeiruqin.xlsx", sheet = 1)
 # 查看数据框的列名
 colnames(df)
-# 
+df <- df %>% distinct(ID, Species, .keep_all = TRUE)
 
 df <- df %>%
   rename(
@@ -27,7 +27,6 @@ df <- df %>%
     Disease_5 = D5
   )
 df[is.na(df)] <- 0
-
 
 # 计算 Severity
 df <- df %>%
@@ -41,7 +40,10 @@ df$PL <- df$Severity * df$Biomass
 
 
 
-Biomass_result <- aggregate(Biomass ~ ID, data = df, FUN = mean)
+Biomass_result <- aggregate(Biomass ~ ID, data = df, FUN = sum)
+
+
+Biomass_count <- aggregate(Biomass ~ ID, data = df, FUN = length)
 
 PL_result <- aggregate(PL ~ ID, data = df, FUN = sum)
 
@@ -49,17 +51,20 @@ PL_result <- aggregate(PL ~ ID, data = df, FUN = sum)
 result <- merge(Biomass_result, PL_result, by = "ID")
 
 # 计算相除结果，并添加为新列
-result$Ratio <-result$PL/ result$Biomass 
+result$Ratio <-result$PL/ result$Biomass *100
 
 result$Prefix <- sub("-[^-]*$", "",result$ID)
 
 output_df  <- read.csv("data/output.csv")
 
-output_df$Renamed_ID <- gsub("hn-S", "HN", output_df$Site)
-# print(df)
+merged_df <- merge(result, output_df, 
+                   by.x = "Prefix", 
+                   by.y = "Site")
 
-# 查看结果
-
+selected_columns <- merged_df[, c("lon", "lat", "Ratio")]
+library(openxlsx)
+# 保存为Excel文件
+write.xlsx(selected_columns, "data/merge.xlsx")
 # 查看结果
 print(output_df)
 print(df)

@@ -3,3 +3,8 @@ matplotlib
 geopandas
 pygeo-cn
 xlrd
+xarray
+netCDF4
+rasterio
+h5netcdf 
+h5py

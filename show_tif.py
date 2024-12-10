@@ -5,7 +5,7 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import get_cmap
 
 # 打开 TIFF 文件
-tif_file = "C:/Users/r/Desktop/work12/data/HWSD_1247/tif/AWC_CLASS.tif"
+tif_file = "C:/Users/r/Desktop/work12/data/HWSD_1247/tif/AWT_SOC.tif"
 
 with rasterio.open(tif_file) as src:
     # 读取栅格数据

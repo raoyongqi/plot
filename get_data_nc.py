@@ -37,7 +37,24 @@ def get_band_data(nc_file, lat_lon_points):
             closest_band_data_list = []  # 存储当前波段每个经纬度点的值
             if len(ds[band_name].values.shape) == 3:
                 print(f"Skipping {band_name} as it is 3D.")
-                continue  # Skip to the next band in this case
+                if band_name == 'AWT_SOC':
+                    continue  # Skip to the next band in this case
+                if band_name == 'BULK_DEN':
+                    continue  # Skip to the next band in this case
+
+                if band_name == 'DOM_MU':
+                    continue  # Skip to the next band in this case
+                if band_name == 'DOM_SOC':
+                    continue  # Skip to the next band in this case
+
+                if band_name == 'PCT_CLAY':
+                    continue  # Skip to the next band in this case
+                if band_name == 'PCT_SAND':
+                    continue  # Skip to the next band in this case
+                if band_name == 'PH':
+                    continue  # Skip to the next band in this case
+                if band_name == 'REF_BULK':
+                    continue  # Skip to the next band in this case
             for lat_lon in lat_lon_points:
                 lat_idx = np.abs(latitudes - lat_lon[1]).argmin()  # 计算最接近的纬度索引
                 lon_idx = np.abs(longitudes - lat_lon[0]).argmin()  # 计算最接近的经度索引

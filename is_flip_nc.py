@@ -2,7 +2,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 
 # 输入 NetCDF 文件路径
-input_file = 'data/HWSD_1247/data/AWC_CLASS.nc4'
+input_file = 'data/HWSD_1247/data/AWT_SOC.nc4'
 
 # 打开 NetCDF 文件
 ds = xr.open_dataset(input_file)

@@ -15,7 +15,7 @@ else:  # Linux 或其他 Unix 系统
 # 动态设置文件路径
 excel_file = os.path.join(base_path, 'climate_data.xlsx')
 tif_folder = os.path.join(base_path, 'HWSD_1247', 'tif')
-output_excel = os.path.join(base_path, 'climate_soil.xlsx')
+output_excel = os.path.join(base_path, 'climate_soil_tif.xlsx')
 
 
 
@@ -38,10 +38,13 @@ def get_band_data(tif_file, lat_lon_points):
         row_col_indices = np.array(row_col_indices).astype(int)
 
         # 提取栅格值
+        pixel_values = []
         # pixel_values = [band_data[row, col] for row, col in row_col_indices]
-        print(f"Input points: {band_data[row_col_indices[0]]}")  # 打印经纬度点
-        raise
-        pixel_values = np.where(np.isnan(pixel_values), -9999, pixel_values)
+        for indice in row_col_indices:
+
+            pixel_values.append(band_data[*indice])
+
+        # pixel_values = np.where(np.isnan(pixel_values), -9999, pixel_values)
         
         return pixel_values
 

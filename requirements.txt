@@ -8,3 +8,9 @@ netCDF4
 rasterio
 h5netcdf 
 h5py
+scikit-learn 
+seaborn
+joblib
+ lightgbm
+ xgboost
+ tensorflow

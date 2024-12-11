@@ -2,12 +2,12 @@ import pandas as pd
 from PyGeoCN.regeo import regeo
 
 # 输入和输出文件路径
-input_file = 'data/lonlat.xlsx'  # 请替换为你的 Excel 文件路径
-output_file = 'data/output.csv'  # 保存结果的 CSV 文件路径
+input_file = 'data/climate_soil_tif.xlsx'  # 请替换为你的 Excel 文件路径
+output_file = 'data/climate_soil_loc.csv'  # 保存结果的 CSV 文件路径
 
 # 读取 Excel 文件
 df = pd.read_excel(input_file)
-
+df.columns = df.columns.str.lower()
 # 确保输入数据包含 'lon' 和 'lat' 列
 if 'lon' not in df.columns or 'lat' not in df.columns:
     raise ValueError("Excel 文件中需要包含 'lon' 和 'lat' 列。")

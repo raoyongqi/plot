@@ -19,7 +19,7 @@ gdf_geojson = gpd.read_file(geojson_file_path)
 #     raise KeyError("The column 'value' does not exist in the shapefile data.")
 
 # 读取 Excel 文件
-file_path = 'data/lonlat.xlsx'  # 替换为您的文件路径
+file_path = 'data/climate_soil_tif.xlsx'  # 替换为您的文件路径
 
 points_df = pd.read_excel(file_path)  # 第一个工作表
 
@@ -27,7 +27,7 @@ points_df = pd.read_excel(file_path)  # 第一个工作表
 # 创建 GeoDataFrame 来转换坐标系
 points_gdf = gpd.GeoDataFrame(
     points_df, 
-    geometry=gpd.points_from_xy(points_df['lon'], points_df['lat']), 
+    geometry=gpd.points_from_xy(points_df['LON'], points_df['LAT']), 
     crs='EPSG:4326'  # WGS84 坐标系
 )
 

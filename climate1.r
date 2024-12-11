@@ -97,7 +97,7 @@ for (var in variables) {
 }
 
 # 保存结果到新的 Excel 文件
-output_file_path <- "data/climate_data.xlsx"
+output_file_path <- "climate_data.xlsx"
 write.xlsx(result, output_file_path, rowNames = FALSE)
 # 保存为 CSV 文件，使用 UTF-8 编码
 csv_output_file_path <- "data/climate_data.csv"

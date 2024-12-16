@@ -65,10 +65,16 @@ def plot_and_save_bar_chart(data, title, filename):
     plt.close()
 
 # 读取 CSV 文件并进行处理
+# 保存统计结果为 CSV 文件
+def save_to_csv(data, filename):
+    df = pd.DataFrame(data, columns=['Category', 'Count'])
+    df.to_csv('data/' + filename, index=False)
+
+# 读取 CSV 文件并进行处理
 file_path = 'data/output.csv'  # 替换为你的 CSV 文件路径
 df = read_csv_file(file_path)
 
-# 统计并绘制条形图
+# 统计数据
 site_sorted, province_sorted, city_sorted, district_sorted = count_values(df)
 
 # 保存前10个统计结果为条形图
@@ -77,4 +83,11 @@ plot_and_save_bar_chart(province_sorted, 'Top 10 Provinces by Count', 'top_10_pr
 plot_and_save_bar_chart(city_sorted, 'Top 10 Cities by Count', 'top_10_cities.png')
 plot_and_save_bar_chart(district_sorted, 'Top 10 Districts by Count', 'top_10_districts.png')
 
+# 保存统计结果为 CSV 文件
+save_to_csv(site_sorted, 'site_counts.csv')
+save_to_csv(province_sorted, 'province_counts.csv')
+save_to_csv(city_sorted, 'city_counts.csv')
+save_to_csv(district_sorted, 'district_counts.csv')
+
 print("Charts saved as 'top_10_sites.png', 'top_10_provinces.png', 'top_10_cities.png', 'top_10_districts.png'")
+print("Data saved as 'site_counts.csv', 'province_counts.csv', 'city_counts.csv', 'district_counts.csv'")

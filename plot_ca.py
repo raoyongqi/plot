@@ -24,12 +24,23 @@ file_path = 'data/climate_soil_tif.xlsx'  # 替换为您的文件路径
 points_df = pd.read_excel(file_path)  # 第一个工作表
 
 
-# 创建 GeoDataFrame 来转换坐标系
+# 统计每个经纬度的数量
+points_count = points_df.groupby(['LON', 'LAT']).size().reset_index(name='Count')
+
+# 输出统计信息
+print(points_count.head())  # 查看统计后的前几行数据
+print(f"共有不同经纬度点: {len(points_count)}")
+
+# 只保留经纬度唯一的点用于绘图
 points_gdf = gpd.GeoDataFrame(
-    points_df, 
-    geometry=gpd.points_from_xy(points_df['LON'], points_df['LAT']), 
+    points_count,  # 使用统计后的数据
+    geometry=gpd.points_from_xy(points_count['LON'], points_count['LAT']), 
     crs='EPSG:4326'  # WGS84 坐标系
 )
+
+# 输出样点数量（去重后）
+print(f"去重后样点数量: {len(points_gdf)}")
+
 
 # 定义 Albers 投影坐标系
 albers_proj = ccrs.AlbersEqualArea(
@@ -51,6 +62,9 @@ if gdf_geojson.crs != albers_proj:
 
 # 转换样点的坐标系到自定义投影坐标系
 points_gdf = points_gdf.to_crs(albers_proj)
+# 统计样点数量
+num_points = len(points_gdf)
+print(f"样点数量: {num_points}")
 
 # 绘制转换后的 GeoJSON 数据
 gdf_geojson.plot(ax=ax, edgecolor='black', facecolor='white', label='GeoJSON Data')
@@ -63,6 +77,8 @@ points_gdf.plot(ax=ax, color='red', marker='o', label='Sample Points', markersiz
 
 # 添加标题
 plt.title('Filtered Grasslands and GeoJSON Data with Sample Points')
+# 统计样点数量
+
 
 
 legend_patches = [
@@ -80,7 +96,7 @@ gridlines.top_labels = False
 gridlines.right_labels = False
 
 # 保存图形到文件
-output_file_path = 'data/shapefile_overlay_cartopy.png'
+output_file_path = 'data/sample.png'
 plt.savefig(output_file_path, dpi=300, bbox_inches='tight')
 
 # 显示图形

@@ -2,8 +2,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-import joblib  # 用于保存模型
-import os  # 用于处理文件和目录
 from boruta import BorutaPy
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -13,49 +11,93 @@ import pandas as pd
 import numpy as np
 import time
 import xgboost as xgb
-import lightgbm as lgb  # Import LightGBM
+import lightgbm as lgb  
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-# 1. 读取Excel文件
-# 1. 读取Excel文件
-file_path = "data/selection.csv"  # 替换为你的文件路径
-selection = pd.read_csv(file_path)
 
-# 对自变量进行标准化，保持因变量不变
-X = selection.drop(columns='RATIO')
-y = selection['RATIO']
+file_path = 'data/climate_soil.xlsx'  # 替换为你的文件路径
+data = pd.read_excel(file_path)
+
+data.columns = data.columns.str.lower()
+
+data.columns = [col.replace('_resampled', '') if '_resampled' in col else col for col in data.columns]
+data.columns = [col.replace('wc2.1_5m_', '') if col.startswith('wc2.1_5m_') else col for col in data.columns]
+new_columns = []
+for col in data.columns:
+    if '_' in col:  # 如果列名中有下划线
+        parts = col.split('_')  # 用下划线拆分列名
+        if len(parts) > 1 and parts[0] == parts[-1]:  
+            new_columns.append('_'.join(parts[:1]))  
+        elif len(parts) > 2 and parts[1] == parts[-1]: 
+            # 将拆分后的第一部分和最后一部分合并
+            new_columns.append('_'.join(parts[:2]))  
+        elif len(parts) > 3 and parts[2] == parts[-1]:  
+            # 将拆分后的第一部分和最后一部分合并
+            new_columns.append('_'.join(parts[:2]))  
+        else:
+            new_columns.append(col)  
+    else:
+        new_columns.append(col)  
+
+data.columns = new_columns
+
+# 将所有 'prec_*' 列加总为 MAP
+data['MAP'] = data.filter(like='prec_').sum(axis=1)
+data['WIND'] = data.filter(like='wind_').mean(axis=1)
+data['MAX_MAT'] = data.filter(like='tmax_').mean(axis=1)
+data['MIN_MAT'] = data.filter(like='tmin_').mean(axis=1)
+data['AVG_MAT'] = data.filter(like='tavg_').mean(axis=1)
+
+data['SRAD'] = data.filter(like='srad_').mean(axis=1)
+data['VAPR'] = data.filter(like='vapr_').mean(axis=1)
+data['TSEA'] = data['bio_4']
+data['PSEA'] =data['bio_15']
+
+# 删除 'prec_*' 列
+data = data.drop(columns=data.filter(like='prec_').columns)
+data = data.drop(columns=data.filter(like='srad_').columns)
+data = data.drop(columns=data.filter(like='tmax_').columns)
+data = data.drop(columns=data.filter(like='tmin_').columns)
+data = data.drop(columns=data.filter(like='tavg_').columns)
+data = data.drop(columns=data.filter(like='vapr_').columns)
+
+data = data.drop(columns=data.filter(like='wind_').columns)
+data = data.drop(columns=data.filter(like='bio_').columns)
+data.columns = data.columns.str.upper()
+data = data.drop(columns=['MU_GLOBAL','REF_DEPTH', 'LANDMASK', 'ROOTS', 'ISSOIL'])
+feature_columns = [col for col in data.columns if col != 'RATIO']
+
+
+X = data[feature_columns]
+y = data['RATIO']  # 目标变量
+
+
+# 4. 分割数据集为训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 5. 初始化并训练随机森林回归模型
+rf = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# 6. 使用 Boruta 进行特征选择
+feat_selector = BorutaPy(rf, n_estimators='auto',max_iter=10, alpha=0.05, random_state=42, verbose=2)
+# # 7. 获取重要特征并选择前17个
+
+feat_selector.fit(X_train.values, y_train.values)
+# 按照ranking_的顺序排序特征名
+sorted_features = [feature for _, feature in sorted(zip(feat_selector.ranking_, feature_columns))]
+
+
+X = data[[*sorted_features[:17]]]
+y =  data['RATIO']  # 目标变量  # 替换为你的目标变量
 
 
 # 4. Split the dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# # 5. Standardize the data
-# scaler = StandardScaler()
-# X_train = scaler.fit_transform(X_train)
-# X_test = scaler.transform(X_test)
 
-# 6. Build the neural network model
-# nn_model = Sequential()
-# nn_model.add(Dense(64, input_dim=X_train.shape[1], activation='relu'))  # Input layer and hidden layer
-# nn_model.add(Dense(32, activation='relu'))  # Second hidden layer
-# nn_model.add(Dense(1))  # Output layer
-
-# # 7. Compile the model
-# nn_model.compile(loss='mean_squared_error', optimizer='adam')
-
-# # 8. Train the model
-# start_time = time.time()
-# nn_model.fit(X_train, y_train, epochs=50, batch_size=10, verbose=0)  # verbose=0 to turn off training progress bar
-# nn_time = time.time() - start_time
-
-# 9. Predict and evaluate the neural network model
-# 10. Train and evaluate the XGBoost model
 start_time = time.time()
 xgb_model = xgb.XGBRegressor(objective='reg:squarederror', eval_metric='rmse')
 xgb_model.fit(X_train, y_train)

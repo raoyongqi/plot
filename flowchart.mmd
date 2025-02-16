@@ -1,0 +1,30 @@
+graph LR
+    A[数据集（n=770）] -->|经纬度| B{"WorldClim v2.0[1]"}:::ref1
+    A[数据集（n=770）] -->|经纬度| C{"HWSD[2] v1.2"}:::ref2
+
+    B --> D{"气候变量"}
+    C --> E{"土壤变量"}
+
+    D --> F{"中国植物病害数据"}
+    E --> F{"中国植物病害数据"}
+
+    F --> G{"机器学习模型"}
+
+    subgraph References
+        R1["[1] Fick SE, Hijmans RJ. WorldClim 2: new 1-km spatial resolution climate surfaces for global land areas.<br> International Journal of Climatology 37, 4302-4315 (2017)."]
+        R2["[2] FAO/IIASA/ISRIC/ISS-CAS/JRC. Harmonized World Soil Database (version 1.2).<br> FAO, Rome, Italy and IIASA, Laxenburg, Austria, (2012)."]
+    end
+
+    B -.-> R1
+    C -.-> R2
+
+    classDef ref1 fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef ref2 fill:#ccf,stroke:#333,stroke-width:2px;
+
+    style R1 white-space:nowrap;
+    style R2 white-space:nowrap;
+
+
+    class R1,R2 reference;
+    
+    class reference fill:#f0f0f0,stroke:#000,stroke-width:2px; 

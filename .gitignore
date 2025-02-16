@@ -3,3 +3,8 @@
 data/
 *.tif
 *.nc
+*.png
+*.pkl
+*.pth
+
+*.tex

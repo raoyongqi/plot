@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import  GradientBoostingRegressor
+
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib  # 用于保存模型
 import os  # 用于处理文件和目录
@@ -23,7 +24,7 @@ y = data['RATIO']  # 目标变量
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # 5. 初始化并训练随机森林回归模型
-rf = RandomForestRegressor(n_estimators=100, random_state=42)
+rf =  GradientBoostingRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
 # 6. 预测并评估模型
@@ -77,48 +78,45 @@ predictions_df = pd.DataFrame({
     'Actual': y_test,
     'Predicted': y_pred
 })
-predictions_df.to_csv('data/model/predictions.csv', index=False)
 
-# 读取特征重要性数据
-importance_df = pd.read_csv('data/model/feature_importances.csv')
-
-# 按 Importance 降序排列并选择前10个
 top_n = 10
 top_importance_df = importance_df.sort_values(by='Importance', ascending=False).head(top_n)
-# 设置颜色映射
-# 设置颜色映射，使用更柔和的颜色
-category_colors = {
-    "geo": "#4C8BF9",  # 柔和的蓝色
-    "clim": "#6BCB4A",  # 柔和的绿色
-    "soil": "#FFA500"   # 柔和的橙色
-}
 
-# 将颜色应用于 DataFrame
-top_importance_df['color'] = top_importance_df['Category'].map(category_colors)
 
-# 绘制前10个最重要的变量重要性图
-plt.figure(figsize=(10, 6))
+# # 设置颜色映射
+# # 设置颜色映射，使用更柔和的颜色
+# category_colors = {
+#     "geo": "#4C8BF9",  # 柔和的蓝色
+#     "clim": "#6BCB4A",  # 柔和的绿色
+#     "soil": "#FFA500"   # 柔和的橙色
+# }
 
-# 直接使用颜色列表作为 palette
-bar_plot = sns.barplot(x='Importance', y='Feature', data=top_importance_df, 
-            palette=top_importance_df['color'].tolist())
+# # 将颜色应用于 DataFrame
+# top_importance_df['color'] = top_importance_df['Category'].map(category_colors)
 
-# 添加标题和标签
-plt.title(f'Top {top_n} Important Features', fontsize=20)  # 增加字体大小
-plt.xlabel('Importance', fontsize=20)  # 增加字体大小
-plt.ylabel('Features', fontsize=20)  # 增加字体大小
+# # 绘制前10个最重要的变量重要性图
+# plt.figure(figsize=(10, 6))
 
-# 设置坐标轴刻度字体大小
-plt.tick_params(axis='both', which='major', labelsize=14)
+# # 直接使用颜色列表作为 palette
+# bar_plot = sns.barplot(x='Importance', y='Feature', data=top_importance_df, 
+#             palette=top_importance_df['color'].tolist())
 
-# 添加图例
-handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in category_colors.values()]
-plt.legend(handles, category_colors.keys(), title="Category", fontsize=12)
+# # 添加标题和标签
+# plt.title(f'Top {top_n} Important Features', fontsize=20)  # 增加字体大小
+# plt.xlabel('Importance', fontsize=20)  # 增加字体大小
+# plt.ylabel('Features', fontsize=20)  # 增加字体大小
 
-# 显示图形
-plt.tight_layout()
+# # 设置坐标轴刻度字体大小
+# plt.tick_params(axis='both', which='major', labelsize=14)
 
-plt.savefig('data/model/rf_summary_plot.png', bbox_inches='tight')  # 使用 bbox_inches='tight' 确保内容完整
+# # 添加图例
+# handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in category_colors.values()]
+# plt.legend(handles, category_colors.keys(), title="Category", fontsize=12)
 
-plt.show()
-plt.close()
+# # 显示图形
+# plt.tight_layout()
+
+# plt.savefig('data/model/rf_summary_plot.png', bbox_inches='tight')  # 使用 bbox_inches='tight' 确保内容完整
+
+# plt.show()
+# plt.close()

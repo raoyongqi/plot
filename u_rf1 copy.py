@@ -22,7 +22,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 
-file_path = 'data/climate_soil.xlsx'  # 替换为你的文件路径
+file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
 data = pd.read_excel(file_path)
 # data.drop(columns=['Province', 'City', 'District'], inplace=True)
 
@@ -76,7 +76,11 @@ data = data.drop(columns=data.filter(like='vapr_').columns)
 data = data.drop(columns=data.filter(like='wind_').columns)
 data = data.drop(columns=data.filter(like='bio_').columns)
 data.columns = data.columns.str.upper()
-data = data.drop(columns=['MU_GLOBAL','REF_DEPTH', 'LANDMASK', 'ROOTS', 'ISSOIL'])
+columns_to_drop = ['MU_GLOBAL', 'REF_DEPTH', 'LANDMASK', 'ROOTS', 'ISSOIL']
+existing_columns_to_drop = [col for col in columns_to_drop if col in data.columns]
+
+# 仅删除存在的列
+data = data.drop(columns=existing_columns_to_drop)
 feature_columns = [col for col in data.columns if col != 'RATIO']
 
 

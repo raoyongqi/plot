@@ -155,7 +155,6 @@ def evaluation(X_valid, y_valid):
 
         # 左图：实际 vs 预测
         title = f'MSE: {mse:.4f}, R2: {r2:.4f}, RPD: {rpd:.4f}'
-        print(title)
         p = np.polyfit(y_valid[:, 0], y_pred[:, 0], deg=1)
         
         axes[0].scatter(y_valid[:, 0], y_pred[:, 0], color='gray', edgecolors='black', alpha=0.5)

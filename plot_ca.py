@@ -76,7 +76,7 @@ gdf_geojson.plot(ax=ax, edgecolor='black', facecolor='white', label='GeoJSON Dat
 points_gdf.plot(ax=ax, color='red', marker='o', label='Sample Points', markersize=20)
 
 # 添加标题
-plt.title('Filtered Grasslands and GeoJSON Data with Sample Points')
+plt.title('Sample Points')
 # 统计样点数量
 
 

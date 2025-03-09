@@ -24,7 +24,9 @@ else:
     tiff_folders = [
         '/home/r/Desktop/work12/data/result/',
     ]
-# 指定输出文件夹路径
+
+
+
 geojson_output_folder = os.path.join(base_path,'data', 'cropped', 'geojson')
 tiff_output_folder = os.path.join(base_path,'data', 'cropped', 'soil_tiff')
 

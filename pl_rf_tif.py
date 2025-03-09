@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # 1. 读取Excel文件
-file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
+file_path = 'data/hand_data.xlsx'  # 替换为你的文件路径
 data = pd.read_excel(file_path)
 
 # 2. 筛选特征列
@@ -53,7 +53,7 @@ for feature_name, importance_value in zip(feature_columns, feature_importances):
     feature_name = re.sub('_resampled', '', feature_name)  # 移除 '_resampled'
     
     # 判断 category 的类别
-    if feature_name.lower() in ["lon", "lat"]:
+    if feature_name.lower() in ["lon", "lat","hand"]:
         category = "geo"
     elif feature_name.startswith('WC'):
         category = "clim"

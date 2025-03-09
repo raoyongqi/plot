@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 # 1. 读取Excel文件
 # 1. 读取Excel文件
-file_path = 'data/climate_soil.xlsx'  # 替换为你的文件路径
+file_path = 'data/hand_data.xlsx'  # 替换为你的文件路径
 data = pd.read_excel(file_path)
 # data.drop(columns=['Province', 'City', 'District'], inplace=True)
 
@@ -66,7 +66,10 @@ data = data.drop(columns=data.filter(like='vapr_').columns)
 data = data.drop(columns=data.filter(like='wind_').columns)
 data = data.drop(columns=data.filter(like='bio_').columns)
 data.columns = data.columns.str.upper()
-data = data.drop(columns=['MU_GLOBAL','REF_DEPTH', 'LANDMASK', 'ROOTS', 'ISSOIL'])
+
+columns_to_drop = ['MU_GLOBAL', 'REF_DEPTH', 'LANDMASK', 'ROOTS', 'ISSOIL']
+existing_columns_to_drop = [col for col in columns_to_drop if col in data.columns]
+data = data.drop(columns=existing_columns_to_drop)
 feature_columns = [col for col in data.columns if col != 'RATIO']
 
 
@@ -89,7 +92,7 @@ feat_selector.fit(X_train.values, y_train.values)
 sorted_features = [feature for _, feature in sorted(zip(feat_selector.ranking_, feature_columns))]
 
 
-X = data[[*sorted_features[:17]]]
+X = data[[*sorted_features[:16]]]
 y =  data['RATIO']  # 目标变量  # 替换为你的目标变量
 
 rf = RandomForestRegressor(random_state=42)
@@ -120,6 +123,7 @@ category_dict = {
     'MAX MAT': 'Climate',
     'TSEA': 'Climate',
     'PSEA': 'Climate',
+    'HAND': 'Geography',
 
     'MAP': 'Climate',
     'AVG MAT': 'Climate',
@@ -128,26 +132,29 @@ category_dict = {
     'S CLAY': 'Soil',
     'T SAND': 'Soil',
     'T REF BULK': 'Soil',
+    'S REF BULK': 'Soil',
 
     'T BULK DEN': 'Soil',
     'T GRAVEL': 'Soil'
 }
 
 importance_df['Category'] = importance_df['Feature'].map(category_dict)
-
-
+print(importance_df['Category'])
+importance_df = importance_df[importance_df["Importance"] >= 0.03]
+print(importance_df["Importance"])
 importance_df = importance_df[["Response",'Feature', 'Category', "Importance"]]
 
 latex_output = importance_df.to_latex(index=False, float_format="%.2f", caption="Feature Importance Table", label="tab:feature_importance")
 
-output_file = "feature_importance.tex"
+output_file = "feature_importance1.tex"
 
 with open(output_file, "w") as f:
 
     f.write(latex_output)
 
 
-
+output_file = "feature_importance1.xlsx"
+importance_df.to_excel(output_file, float_format="%.2f",index=False)
 # # 8. 使用选择的特征重新训练模型
 # X_train_filtered = X_train[top_17_features]
 # X_test_filtered = X_test[top_17_features]

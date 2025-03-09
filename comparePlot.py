@@ -70,10 +70,10 @@ ax2.legend(loc='upper left')
 
 # 绘制实际值与不同模型的预测值
 files_actual = [
-    'actual/denseNet_actual_vs_predicted.csv',
-    'actual/wavenet1_actual_vs_predicted.csv',
-    'actual/wavenet2_actual_vs_predicted.csv',
-    'actual/wavenet5_actual_vs_predicted.csv'
+    'history/denseNet_actual_vs_predicted.csv',
+    'history/wavenet1_actual_vs_predicted.csv',
+    'history/wavenet2_actual_vs_predicted.csv',
+    'history/wavenet5_actual_vs_predicted.csv'
 ]
 
 # 设置颜色和标签
@@ -81,7 +81,7 @@ colors = ['blue', 'green', 'red', 'orange']
 labels = ['DenseNet', 'Wavenet1', 'Wavenet2', 'Wavenet5']
 
 # 读取 wavenet3 的数据，用于动态计算拟合线的范围
-df_wavenet3 = pd.read_csv('actual/wavenet5_actual_vs_predicted.csv')
+df_wavenet3 = pd.read_csv('history/wavenet5_actual_vs_predicted.csv')
 min_actual = df_wavenet3["Actual"].min()
 max_actual = df_wavenet3["Actual"].max()
 
@@ -101,11 +101,36 @@ for file in files:
     # 获取该模型的线型和颜色
     linestyle, color = line_styles[model_name]
     
-    # 在左侧子图（ax1）上绘制训练损失曲线
-    ax1.plot(loss, label=f'{model_name} Train Loss', linestyle=linestyle, color=color)
-    
-    # 在右侧子图（ax2）上绘制验证损失曲线
-    ax2.plot(val_loss, label=f'{model_name} Val Loss', linestyle=linestyle, color=color)
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.signal import savgol_filter
+
+    # 假设 loss 和 val_loss 是损失数据
+    loss = np.array(loss)  # 转换为 NumPy 数组
+    val_loss = np.array(val_loss)
+
+    # 计算平滑曲线（窗口大小和多项式阶数可以调整）
+    window_size = min(11, len(loss))  # 确保窗口大小不超过数据长度
+    if window_size % 2 == 0:  # 窗口大小必须是奇数
+        window_size += 1
+
+    smooth_loss = savgol_filter(loss, window_size, 3)  # 3阶多项式拟合
+    smooth_val_loss = savgol_filter(val_loss, window_size, 3)
+
+    # 计算置信区间（假设标准差为数据的 10%）
+    loss_std = np.std(loss) * 0.1
+    val_loss_std = np.std(val_loss) * 0.1
+
+    # 绘制平滑的训练损失曲线
+    ax1.plot(smooth_loss, label=f'{model_name} Train Loss', linestyle=linestyle, color=color)
+    ax1.fill_between(range(len(smooth_loss)), smooth_loss - loss_std, smooth_loss + loss_std, 
+                    color=color, alpha=0.2)  # 绘制阴影
+
+    # 绘制平滑的验证损失曲线
+    ax2.plot(smooth_val_loss, label=f'{model_name} Val Loss', linestyle=linestyle, color=color)
+    ax2.fill_between(range(len(smooth_val_loss)), smooth_val_loss - val_loss_std, smooth_val_loss + val_loss_std, 
+                    color=color, alpha=0.2)  # 绘制阴影
+
 
 # 设置左侧子图的标题和标签
 ax1.set_title('Training Loss')
@@ -122,14 +147,14 @@ ax1.set_ylim([10, 50])  # 左侧 Y 轴范围
 ax2.set_ylim([10, 50])  # 右侧 Y 轴范围
 
 
-#df_wavenet3 = pd.read_csv('actual/wavenet5_actual_vs_predicted.csv')
+#df_wavenet3 = pd.read_csv('history/wavenet5_actual_vs_predicted.csv')
 min_actual = df_wavenet3["Actual"].min()
 max_actual = df_wavenet3["Actual"].max()
 files_actual = [
-    'actual/denseNet_actual_vs_predicted.csv',
-    'actual/wavenet1_actual_vs_predicted.csv',
-    'actual/wavenet2_actual_vs_predicted.csv',
-    'actual/wavenet5_actual_vs_predicted.csv'
+    'history/denseNet_actual_vs_predicted.csv',
+    'history/wavenet1_actual_vs_predicted.csv',
+    'history/wavenet2_actual_vs_predicted.csv',
+    'history/wavenet5_actual_vs_predicted.csv'
 ]
 # 根据 wavenet3 数据的实际值范围，动态生成拟合线的 x 轴
 x_vals = np.linspace(min_actual, max_actual, 100)  # 创建与实际数据范围相同的 x 值

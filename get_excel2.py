@@ -9,10 +9,8 @@ model_data = {
     'Time Taken': [0.18, 0.43, 0.19, 0.06, 0.01, 0.19, 0.06, 0.01]
 }
 
-# Create DataFrame
 df_model = pd.DataFrame(model_data)
 
-# Saving the dataframe to an Excel file
 model_file_path = 'model_performance.xlsx'
 df_model.to_excel(model_file_path, index=False)
 

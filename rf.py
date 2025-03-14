@@ -68,10 +68,8 @@ tif_folder2 = 'data/cropped/soil_tiff'  # 替换为第二个tif文件夹路径
 # 获取两个文件夹中的所有 .tif 文件
 tif_files = []
 
-# 从第一个文件夹读取 .tif 文件
 tif_files += [os.path.join(tif_folder1, f) for f in os.listdir(tif_folder1) if f.endswith('.tif')]
 
-# 从第二个文件夹读取 .tif 文件
 tif_files += [os.path.join(tif_folder2, f) for f in os.listdir(tif_folder2) if f.endswith('.tif')]
 
 output_folder = 'data/result'  # 替换为实际输出文件夹路径
@@ -87,20 +85,16 @@ for i, file in enumerate(tif_files):
     if i == 0:  # 只保存第一个tif的经纬度信息
         lons, lats = xs, ys
 
-# 将数据和经纬度转换为二维数组
 data_stack = np.stack(data_list, axis=-1)
 rows, cols, bands = data_stack.shape
 data_2d = data_stack.reshape((rows * cols, bands))
 
-# 添加经纬度信息作为特征
 coords_2d = np.stack((lons.flatten(), lats.flatten()), axis=1)
 data_with_coords = np.hstack((coords_2d, data_2d))
 
-# 将数据转换为DataFrame
 feature_names = ['LON', 'LAT'] + [get_feature_name(f) for f in tif_files]
 df = pd.DataFrame(data_with_coords, columns=feature_names)
 
-# 调整数据框的列顺序以匹配模型的特征顺序
 model_feature_names = feature_columns
 
 
@@ -113,20 +107,17 @@ model_feature_names = [col.lower() for col in model_feature_names]
 
 df = df[model_feature_names]
 
-# 进行预测
 y_pred = rf.predict(df)
 
-# 将预测结果转换为二维数组
 y_pred_2d = y_pred.reshape((rows, cols))
 
-# 确保输出文件夹存在
 os.makedirs(output_folder, exist_ok=True)
 def save_tif(file_path, data, profile):
     with rasterio.open(file_path, 'w', **profile) as dst:
         dst.write(data, 1)
 
-# 保存预测结果为tif文件
-model_name = 'data/result'  # 模型名称或自定义的名称
+model_name = 'data/result'
+
 output_file = os.path.join(output_folder, f'predicted_rf.tif')
 save_tif(output_file, y_pred_2d, profiles[0])
 

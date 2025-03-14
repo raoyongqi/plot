@@ -14,32 +14,27 @@ random.seed(42)
 np.random.seed(42)
 torch.manual_seed(42)
 
-# 1. Read Excel file
-file_path = 'data/climate_soil_tif.xlsx'  # Replace with your file path
+file_path = 'data/climate_soil_tif.xlsx' 
+
 data = pd.read_excel(file_path)
 
-# 2. Select feature columns
 feature_columns = [col for col in data.columns if col.endswith('_resampled') or col.lower().startswith('wc') or col in ['LON', 'LAT']]
 
-# 3. Separate features and target variable
 X = data[feature_columns].values
 y = data['RATIO'].values
 
-# 4. Split the dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 5. Standardize features
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Convert to PyTorch tensors
 X_train_tensor = torch.tensor(X_train_scaled, dtype=torch.float32)
 X_test_tensor = torch.tensor(X_test_scaled, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.float32).view(-1, 1)
 
-# 6. Build the neural network model
+
 class NNModel(nn.Module):
     def __init__(self):
         super(NNModel, self).__init__()
@@ -59,21 +54,17 @@ class NNModel(nn.Module):
         x = self.output(x)
         return x
 
-# Initialize model
 model = NNModel()
 
-# 7. Set optimizer and loss function
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 loss_fn = nn.MSELoss()
 
-# 8. Early stopping setup
-patience = 40  # Number of epochs to wait for improvement
+patience = 40 
 best_val_loss = float('inf')
 patience_counter = 0
 train_losses = []
 val_losses = []
 
-# 9. Train the model with early stopping
 epochs = 150
 batch_size = 16
 
@@ -100,14 +91,12 @@ for epoch in range(epochs):
     train_losses.append(train_loss)
     val_losses.append(val_loss)
 
-    # Check if validation loss improved
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        patience_counter = 0  # Reset patience counter
+        patience_counter = 0 
     else:
         patience_counter += 1
 
-    # Stop if no improvement for 'patience' epochs
     if patience_counter >= patience:
         print(f"Early stopping at epoch {epoch+1} due to no improvement in validation loss")
         break
@@ -115,7 +104,7 @@ for epoch in range(epochs):
     if epoch % 10 == 0:
         print(f'Epoch {epoch}/{epochs}, Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}')
 
-# 10. Predictions and evaluation
+
 model.eval()
 with torch.no_grad():
     y_pred_nn = model(X_test_tensor)
@@ -125,7 +114,6 @@ with torch.no_grad():
 print(f"Optimized Neural Network MSE: {mse_nn:.4f}")
 print(f"Optimized Neural Network R²: {r2_nn:.4f}")
 
-# 11. Plot loss curve
 plt.figure(figsize=(8, 4))
 plt.plot(train_losses, label='Training Loss', color='b')
 plt.plot(val_losses, label='Validation Loss', color='r', linestyle='dashed')
@@ -133,5 +121,5 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.title('Training & Validation Loss Curve')
 plt.legend()
-plt.savefig("loss_curve_pytorch_early_stopping.png", dpi=300, bbox_inches='tight')  # Save as high-resolution image
+plt.savefig("loss_curve_pytorch_early_stopping.png", dpi=300, bbox_inches='tight')
 plt.show()

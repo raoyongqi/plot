@@ -32,9 +32,8 @@ for col in data.columns:
 
 data.columns = new_columns
 
-# 特征和目标变量
 feature_columns = [col for col in data.columns]
-#Load dataset
+
 dataset = data[feature_columns]
 feature_columns = [col for col in data.columns if col != 'ratio']
 
@@ -112,16 +111,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def evaluate(y_true, y_pred):
+
     print(y_true.shape)
     print(y_pred.shape)
 
-    # 计算均方误差 (MSE)
     mse = mean_squared_error(y_true, y_pred)
     
-    # 计算R²值
     r2 = r2_score(y_true, y_pred)
     
-    # 计算相对百分比误差 (RPD)
     rpd = np.std(y_true) / np.sqrt(mse)
     
     return mse, r2, rpd
@@ -138,7 +135,6 @@ def evaluation(X_valid, y_valid):
     """ 评估模型，并绘制左右两张图 """
     y_pred, (mse, r2, rpd) = evaluate_model(model, X_valid, y_valid)
     
-    # 处理 Pandas 数据
     if isinstance(y_valid, (pd.DataFrame, pd.Series)):
         y_valid = y_valid.values
     if isinstance(y_pred, (pd.DataFrame, pd.Series)):
@@ -147,13 +143,11 @@ def evaluation(X_valid, y_valid):
     y_valid = np.array(y_valid).reshape(-1, 1) if y_valid.ndim == 1 else np.array(y_valid)
     y_pred = np.array(y_pred).reshape(-1, 1) if y_pred.ndim == 1 else np.array(y_pred)
 
-    # 获取训练历史
     train_df = pd.DataFrame(history.history)
 
     with plt.style.context('seaborn-v0_8-poster'):
         fig, axes = plt.subplots(ncols=2, figsize=(16, 8))  # 两张并排的图
 
-        # 左图：实际 vs 预测
         title = f'MSE: {mse:.4f}, R2: {r2:.4f}, RPD: {rpd:.4f}'
         p = np.polyfit(y_valid[:, 0], y_pred[:, 0], deg=1)
         

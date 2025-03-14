@@ -9,10 +9,11 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 
 
-file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
+file_path = 'data/climate_soil_tif.xlsx'
 data = pd.read_excel(file_path)
 
-# 处理列名
+
+
 data.columns = data.columns.str.lower()
 data.columns = [col.replace('_resampled', '') if '_resampled' in col else col for col in data.columns]
 data.columns = [col.replace('wc2.1_5m_', '') if col.startswith('wc2.1_5m_') else col for col in data.columns]
@@ -76,13 +77,10 @@ def evaluate(y_true, y_pred):
     print(y_true.shape)
     print(y_pred.shape)
 
-    # 计算均方误差 (MSE)
     mse = mean_squared_error(y_true, y_pred)
     
-    # 计算R²值
     r2 = r2_score(y_true, y_pred)
     
-    # 计算相对百分比误差 (RPD)
     rpd = np.std(y_true) / np.sqrt(mse)
     
     return mse, r2, rpd

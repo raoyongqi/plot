@@ -9,10 +9,11 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score
 
 
-file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
+file_path = 'data/climate_soil_tif.xlsx'
+
+
 data = pd.read_excel(file_path)
 
-# 处理列名
 data.columns = data.columns.str.lower()
 data.columns = [col.replace('_resampled', '') if '_resampled' in col else col for col in data.columns]
 data.columns = [col.replace('wc2.1_5m_', '') if col.startswith('wc2.1_5m_') else col for col in data.columns]
@@ -33,10 +34,10 @@ for col in data.columns:
 
 data.columns = new_columns
 
-# 特征和目标变量
 feature_columns = [col for col in data.columns]
-#Load dataset
+
 dataset = data[feature_columns]
+
 feature_columns = [col for col in data.columns if col != 'ratio']
 
 from sklearn.model_selection import train_test_split
@@ -45,7 +46,7 @@ X = data[feature_columns]
 data = data.rename(columns={'ratio': 'Pathogen Load'})
 
 
-y = data['Pathogen Load']  # 目标变量
+y = data['Pathogen Load']
 
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
@@ -100,7 +101,6 @@ def evaluation(X_valid, y_valid):
     """ 评估模型，并将预测结果和训练历史保存为 CSV """
     y_pred, (mse, r2, rpd) = evaluate_model(model, X_valid, y_valid)
     
-    # 处理 Pandas 数据
     if isinstance(y_valid, (pd.DataFrame, pd.Series)):
         y_valid = y_valid.values
     if isinstance(y_pred, (pd.DataFrame, pd.Series)):
@@ -109,17 +109,15 @@ def evaluation(X_valid, y_valid):
     y_valid = np.array(y_valid).reshape(-1, 1) if y_valid.ndim == 1 else np.array(y_valid)
     y_pred = np.array(y_pred).reshape(-1, 1) if y_pred.ndim == 1 else np.array(y_pred)
 
-    # 保存实际 vs 预测结果
     results_df = pd.DataFrame({
         'Actual': y_valid[:, 0],
         'Predicted': y_pred[:, 0]
     })
     results_df.to_csv("wavenet5_actual_vs_predicted.csv", index=False)
 
-    # 获取训练历史并保存
     train_df = pd.DataFrame(history.history)
     train_df.to_csv("wavenet5_training_history.csv", index=False)
 
     return y_pred, mse, r2, rpd
     
-evaluation(X_valid, y_valid)  # 显式传递 X_valid, y_valid
+evaluation(X_valid, y_valid)  

@@ -32,9 +32,9 @@ for col in data.columns:
 
 data.columns = new_columns
 
-# 特征和目标变量
 feature_columns = [col for col in data.columns]
-#Load dataset
+
+
 dataset = data[feature_columns]
 feature_columns = [col for col in data.columns if col != 'ratio']
 
@@ -72,10 +72,10 @@ model.save('wavenet1block.h5')
 
 
 def evaluate(y_true, y_pred):
+
     print(y_true.shape)
     print(y_pred.shape)
 
-    # 计算均方误差 (MSE)
     mse = mean_squared_error(y_true, y_pred)
     
     # 计算R²值

@@ -150,7 +150,6 @@ x = tf.keras.layers.Dense(1)(x)
 
 model = tf.keras.models.Model(inputs=[input_x], outputs=[x])
 
-# 降低学习率，避免梯度爆炸
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4, clipnorm=1.0)  # 限制 L2 范数
 model.compile(loss="mse", optimizer=optimizer)
 
@@ -159,26 +158,22 @@ from tensorflow.keras.callbacks import TerminateOnNaN
 
 history = model.fit(X_train, y_train, validation_data=(X_valid, y_valid), 
                     epochs=500, batch_size=32, 
-                    callbacks=[es, TerminateOnNaN()])# model.save('DenseNet.h5')
+                    callbacks=[es, TerminateOnNaN()])
 
 
 def evaluate(y_true, y_pred):
-    print(y_true.shape)
-    print(y_pred.shape)
 
-    # 计算均方误差 (MSE)
     mse = mean_squared_error(y_true, y_pred)
     
-    # 计算R²值
     r2 = r2_score(y_true, y_pred)
     
-    # 计算相对百分比误差 (RPD)
     rpd = np.std(y_true) / np.sqrt(mse)
     
     return mse, r2, rpd
 
 
 def evaluate_model(model, X, y):
+
     pred = model.predict(X)
     if(tf.is_tensor(pred)):
         pred = pred.numpy()
@@ -187,10 +182,9 @@ def evaluate_model(model, X, y):
 
 
 def evaluation(X_valid, y_valid):
-    """ 评估模型，并将预测结果和训练历史保存为 CSV """
+
     y_pred, (mse, r2, rpd) = evaluate_model(model, X_valid, y_valid)
     
-    # 处理 Pandas 数据
     if isinstance(y_valid, (pd.DataFrame, pd.Series)):
         y_valid = y_valid.values
     if isinstance(y_pred, (pd.DataFrame, pd.Series)):
@@ -199,17 +193,16 @@ def evaluation(X_valid, y_valid):
     y_valid = np.array(y_valid).reshape(-1, 1) if y_valid.ndim == 1 else np.array(y_valid)
     y_pred = np.array(y_pred).reshape(-1, 1) if y_pred.ndim == 1 else np.array(y_pred)
 
-    # 保存实际 vs 预测结果
     results_df = pd.DataFrame({
         'Actual': y_valid[:, 0],
         'Predicted': y_pred[:, 0]
     })
     results_df.to_csv("denseNet_actual_vs_predicted.csv", index=False)
 
-    # 获取训练历史并保存
     train_df = pd.DataFrame(history.history)
     train_df.to_csv("denseNet_training_history.csv", index=False)
 
     return y_pred, mse, r2, rpd
     
-evaluation(X_valid, y_valid)  # 显式传递 X_valid, y_valid
+evaluation(X_valid, y_valid)
+

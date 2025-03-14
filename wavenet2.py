@@ -44,7 +44,7 @@ X = data[feature_columns]
 data = data.rename(columns={'ratio': 'Pathogen Load'})
 
 
-y = data['Pathogen Load']  # 目标变量
+y = data['Pathogen Load']
 
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
@@ -76,13 +76,10 @@ def evaluate(y_true, y_pred):
     print(y_true.shape)
     print(y_pred.shape)
 
-    # 计算均方误差 (MSE)
     mse = mean_squared_error(y_true, y_pred)
     
-    # 计算R²值
     r2 = r2_score(y_true, y_pred)
     
-    # 计算相对百分比误差 (RPD)
     rpd = np.std(y_true) / np.sqrt(mse)
     
     return mse, r2, rpd
@@ -100,7 +97,6 @@ def evaluation(X_valid, y_valid):
     """ 评估模型，并将预测结果和训练历史保存为 CSV """
     y_pred, (mse, r2, rpd) = evaluate_model(model, X_valid, y_valid)
     
-    # 处理 Pandas 数据
     if isinstance(y_valid, (pd.DataFrame, pd.Series)):
         y_valid = y_valid.values
     if isinstance(y_pred, (pd.DataFrame, pd.Series)):
@@ -109,17 +105,15 @@ def evaluation(X_valid, y_valid):
     y_valid = np.array(y_valid).reshape(-1, 1) if y_valid.ndim == 1 else np.array(y_valid)
     y_pred = np.array(y_pred).reshape(-1, 1) if y_pred.ndim == 1 else np.array(y_pred)
 
-    # 保存实际 vs 预测结果
     results_df = pd.DataFrame({
         'Actual': y_valid[:, 0],
         'Predicted': y_pred[:, 0]
     })
     results_df.to_csv("wavenet2_actual_vs_predicted.csv", index=False)
 
-    # 获取训练历史并保存
     train_df = pd.DataFrame(history.history)
     train_df.to_csv("wavenet2_training_history.csv", index=False)
 
     return y_pred, mse, r2, rpd
     
-evaluation(X_valid, y_valid)  # 显式传递 X_valid, y_valid
+evaluation(X_valid, y_valid)

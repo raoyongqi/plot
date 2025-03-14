@@ -151,23 +151,18 @@ results_df = pd.DataFrame({
     'Training Time': times
 })
 
-# Sort by R² score from high to low
 results_df_sorted_r2 = results_df.sort_values(by='R2 Score', ascending=False)
 
-# Sort by Training Time from low to high
 results_df_sorted_time = results_df.sort_values(by='Training Time', ascending=True)
 
-# Plot performance-time graph
 plt.figure(figsize=(14, 7))
 
-# Plot R² Scores sorted from high to low
 plt.subplot(1, 2, 1)
 plt.bar(results_df_sorted_r2['Model'], results_df_sorted_r2['R2 Score'], color=['blue', 'green', 'red', 'purple'])
 plt.xlabel('Model')
 plt.ylabel('R² Score')
 plt.title('R² Score Comparison (High to Low)')
 
-# Plot Training Time sorted from low to high
 plt.subplot(1, 2, 2)
 plt.bar(results_df_sorted_time['Model'], results_df_sorted_time['Training Time'], color=['blue', 'green', 'red', 'purple'])
 plt.xlabel('Model')
@@ -181,14 +176,11 @@ plt.show()
 
 print("Model Performance Comparison:")
 
-# Print R² scores sorted from high to low
 print("\nR² Scores (High to Low):")
 print(results_df_sorted_r2[['Model', 'R2 Score']])
 
-# Print training times sorted from low to high
 results_df_combined = results_df.sort_values(by='R2 Score', ascending=False)
 
-# Save the combined table to LaTeX
 combined_tex_path = "data/model_performance.tex"
 results_df_combined.to_latex(
     combined_tex_path,
@@ -198,5 +190,4 @@ results_df_combined.to_latex(
     float_format="%.4f"
 )
 
-# Output path for reference
 print(f"Combined Model Performance table saved to LaTeX: {combined_tex_path}")

@@ -13,7 +13,7 @@ import tensorflow as tf
 
 import numpy as np
 
-file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
+file_path = 'data/climate_soil_tif.xlsx'
 data = pd.read_excel(file_path)
 import matplotlib.pyplot as plt
 
@@ -38,10 +38,10 @@ for col in data.columns:
 
 data.columns = new_columns
 
-# 特征和目标变量
 feature_columns = [col for col in data.columns]
-#Load dataset
+
 dataset = data[feature_columns]
+
 feature_columns = [col for col in data.columns if col != 'ratio']
 
 from sklearn.model_selection import train_test_split
@@ -60,47 +60,37 @@ def holdout_grid_search(clf, X_train, y_train, X_valid, y_valid, hyperparams, fi
     best_estimator = None
     best_hyperparams = {}
     
-    # hold best running score
-    best_score = 1000 # set to a very big value
+    best_score = 1000
 
-    # get list of param values
     lists = hyperparams.values()
     
-    # get all param combinations
     param_combinations = list(itertools.product(*lists))
     total_param_combinations = len(param_combinations)
 
-    # iterate through param combinations
     for i, params in enumerate(param_combinations, 1):
-        # fill param dict with params
+
         param_dict = {}
         for param_index, param_name in enumerate(hyperparams):
             param_dict[param_name] = params[param_index]
             
-        # create estimator with specified params
         estimator = clf(**param_dict, **fixed_hyperparams)
 
-        # fit estimator
         estimator.fit(X_train, y_train)
         
-        # get predictions on validation set
         preds = estimator.predict(X_valid)
         
-        # compute cindex for predictions
         estimator_score = mean_squared_error(y_valid, preds)
+
         all_mses.append(estimator_score)
 
         print(f'[{i}/{total_param_combinations}] {param_dict}')
         print(f'Val MSE: {estimator_score}\n')
 
-        # if new low score, update low score, best estimator
-        # and best params 
         if estimator_score < best_score:
             best_score = estimator_score
             best_estimator = estimator
             best_hyperparams = param_dict
 
-    # add fixed hyperparamters to best combination of variable hyperparameters
     best_hyperparams.update(fixed_hyperparams)
     
     

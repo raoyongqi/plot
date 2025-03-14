@@ -7,11 +7,12 @@ file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
 data = pd.read_excel(file_path)
 import matplotlib.pyplot as plt
 
-# 处理列名
 data.columns = data.columns.str.lower()
 data.columns = [col.replace('_resampled', '') if '_resampled' in col else col for col in data.columns]
 data.columns = [col.replace('wc2.1_5m_', '') if col.startswith('wc2.1_5m_') else col for col in data.columns]
 new_columns = []
+
+
 for col in data.columns:
     if '_' in col:
         parts = col.split('_')
@@ -28,9 +29,8 @@ for col in data.columns:
 
 data.columns = new_columns
 
-# 特征和目标变量
 feature_columns = [col for col in data.columns]
-#Load dataset
+
 dataset = data[feature_columns]
 feature_columns = [col for col in data.columns if col != 'ratio']
 
@@ -45,7 +45,7 @@ y = data['Pathogen Load']  # 目标变量
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=1/9, random_state=42)
 print(len(X_train), len(X_valid), len(X_test))
-# Plot the outputs and see how they are
+
 ncols=2
 
 
@@ -68,8 +68,8 @@ def evaluate_model(model, X, y):
 
 from sklearn.cross_decomposition import PLSRegression
 
-# define a function to evaluate pls
 def pls_evaluate_num_comp(X_train, y_train, X_valid, y_valid, num_comp):
+
     pls = PLSRegression(n_components=num_comp)
     pls.fit(X_train, y_train)
     y_valid_pred = pls.predict(X_valid)
@@ -79,7 +79,6 @@ def pls_evaluate_num_comp(X_train, y_train, X_valid, y_valid, num_comp):
     return (y_valid_pred, mse, r2, rpd)
 
 
-# Try optimize the number of components (without variable selection) => we will use X1
 def pls_evaluate_num_comps(X_train, y_train, X_valid, y_valid, num_comps):
     mses = []
     r2s = []
@@ -103,9 +102,10 @@ def plot_metric(scores, objective, yLabel):
 
 def pls_evaluate_plot_num_comps(X_train, y_train, X_valid, y_valid, num_comps):
     mses, r2s, rpds = pls_evaluate_num_comps(X_train, y_train, X_valid, y_valid, num_comps)
-    # Plot mses
+
     num_comp, mse = plot_metric(mses, 'min', 'MSE')
     print(f'The best mse is {mse} with {num_comp} PLS components')
 
 num_comps = np.arange(1, 133)
 pls_evaluate_plot_num_comps(X_train, y_train, X_valid, y_valid, num_comps)
+

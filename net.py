@@ -14,41 +14,33 @@ from tensorflow.keras.layers import Dense, Dropout, LeakyReLU
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
 
-# 设置随机种子以确保可重复性
 random.seed(42)
 np.random.seed(42)
 torch.manual_seed(42)
 tf.random.set_seed(42)
 
-# 读取 Excel 文件
-file_path = 'data/climate_soil_tif.xlsx'  # 替换为你的文件路径
+file_path = 'data/climate_soil_tif.xlsx'
 data = pd.read_excel(file_path)
 
-# 筛选特征列
 feature_columns = [col for col in data.columns if col.endswith('_resampled') or col.lower().startswith('wc') or col in ['LON', 'LAT']]
 
-# 分离特征和目标变量
 X = data[feature_columns]
 y = data['RATIO']
 
-# 分割数据集
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 标准化
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# ------------------------
-# PyTorch模型部分
-# ------------------------
-# 转换为PyTorch张量
 X_train_tensor = torch.tensor(X_train_scaled, dtype=torch.float32)
+
 X_test_tensor = torch.tensor(X_test_scaled, dtype=torch.float32)
+
 y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).view(-1, 1)
+
 y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32).view(-1, 1)
 
-# 构建神经网络模型
 class NNModel(nn.Module):
     def __init__(self):
         super(NNModel, self).__init__()
@@ -68,20 +60,18 @@ class NNModel(nn.Module):
         x = self.output(x)
         return x
 
-# 初始化模型
 model = NNModel()
 
-# 设置优化器和损失函数
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 loss_fn = nn.MSELoss()
 
-# 训练模型
 epochs = 150
 batch_size = 16
 train_losses_pytorch = []
 val_losses_pytorch = []
-# 8. Early stopping setup
-patience = 40  # Number of epochs to wait for improvement
+
+patience = 40  
+
 best_val_loss = float('inf')
 patience_counter = 0
 train_losses = []
@@ -110,14 +100,13 @@ for epoch in range(epochs):
     train_losses_pytorch.append(train_loss)
     val_losses_pytorch.append(val_loss)
 
-    # Check if validation loss improved
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        patience_counter = 0  # Reset patience counter
+        patience_counter = 0  
+        
     else:
         patience_counter += 1
 
-    # Stop if no improvement for 'patience' epochs
     if patience_counter >= patience:
         print(f"Early stopping at epoch {epoch+1} due to no improvement in validation loss")
         break
@@ -125,14 +114,11 @@ for epoch in range(epochs):
     if epoch % 10 == 0:
         print(f'Epoch {epoch}/{epochs}, Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}')
 
-# 计算PyTorch预测
+
 y_test_pred_pytorch = model(X_test_tensor).detach().numpy()
 
-# ------------------------
-# TensorFlow模型部分
-# ------------------------
 
-# 构建神经网络模型
+
 nn_model = Sequential([
     Dense(128, input_dim=X_train_scaled.shape[1]),
     LeakyReLU(alpha=0.1),
@@ -145,15 +131,12 @@ nn_model = Sequential([
     Dense(1, activation='linear')
 ])
 
-# 设置优化器和回调函数
 optimizer = Adam(learning_rate=0.001)
 reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, min_lr=1e-5)
 early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
 
-# 编译模型
 nn_model.compile(loss='mean_squared_error', optimizer=optimizer)
 
-# 训练模型并保存训练历史
 history = nn_model.fit(
     X_train_scaled, y_train,
     validation_data=(X_test_scaled, y_test),
@@ -161,28 +144,13 @@ history = nn_model.fit(
     verbose=1, callbacks=[reduce_lr, early_stopping]
 )
 
-# 计算TensorFlow预测
 y_test_pred_tensorflow = nn_model.predict(X_test_scaled)
-
-# ------------------------
-# 绘制损失曲线（左右并排图）
-# ------------------------
-
-# ------------------------
-# 绘制训练和验证损失（左右并排图）
-# ------------------------
-
-# ------------------------
-# 绘制训练和验证损失（左右并排图）
-# ------------------------
 
 
 fig, axs = plt.subplots(1, 2, figsize=(14, 6))
 
-# 设置字体大小
 fontsize = 16
 
-# 绘制训练损失（左图）
 axs[0].plot(train_losses_pytorch, label='Training Loss (PyTorch)', color='b')
 axs[0].plot(history.history['loss'], label='Training Loss (TensorFlow)', color='r')
 axs[0].set_title('Training Loss Comparison (PyTorch vs TensorFlow)', fontsize=fontsize)
@@ -190,7 +158,6 @@ axs[0].set_xlabel('Epochs', fontsize=fontsize)
 axs[0].set_ylabel('Loss', fontsize=fontsize)
 axs[0].legend(fontsize=fontsize)
 
-# 绘制验证损失（右图）
 axs[1].plot(val_losses_pytorch, label='Validation Loss (PyTorch)', color='b', linestyle='dashed')
 axs[1].plot(history.history['val_loss'], label='Validation Loss (TensorFlow)', color='r', linestyle='dashed')
 axs[1].set_title('Validation Loss Comparison (PyTorch vs TensorFlow)', fontsize=fontsize)
@@ -198,27 +165,17 @@ axs[1].set_xlabel('Epochs', fontsize=fontsize)
 axs[1].set_ylabel('Loss', fontsize=fontsize)
 axs[1].legend(fontsize=fontsize)
 
-# 保存图像
 plt.tight_layout()
 plt.savefig("loss_comparison.png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
-# ------------------------
-# 计算PyTorch预测的MSE和R²
-# ------------------------
 mse_pytorch = mean_squared_error(y_test, y_test_pred_pytorch.flatten())
 r2_pytorch = r2_score(y_test, y_test_pred_pytorch.flatten())
 
-# ------------------------
-# 计算TensorFlow预测的MSE和R²
-# ------------------------
 mse_tensorflow = mean_squared_error(y_test, y_test_pred_tensorflow.flatten())
 r2_tensorflow = r2_score(y_test, y_test_pred_tensorflow.flatten())
 
-# ------------------------
-# 创建MSE和R²对比表格
-# ------------------------
 comparison_metrics_df = pd.DataFrame({
     'Model': ['PyTorch', 'TensorFlow'],
     'MSE': [mse_pytorch, mse_tensorflow],

@@ -20,7 +20,7 @@ rcParams['font.sans-serif'] = ['/usr/share/fonts/truetype/noto/NotoSansCJK-Regul
 rcParams['axes.unicode_minus'] = False  # Fix issue with minus sign '-' showing as a block
 
 # Load the Excel file
-file_path = 'data/climate_soil_tif.xlsx'
+file_path = 'data/hand_data.xlsx'
 data = pd.read_excel(file_path)
 
 # Select feature columns

@@ -1,15 +1,13 @@
 # 加载必要的包1
 
 if (!requireNamespace("geodata", quietly = TRUE)) {
-  # If not installed, install it
   install.packages("geodata")
 }
 
 library(geodata)
 library(openxlsx)
-library(raster)  # 添加对 raster 包的引用
-library(utils)   # 添加对 utils 包的引用
-
+library(raster)  
+library(utils)   
 sys_info <- Sys.info()
 
 if (!is.null(sys_info)) {

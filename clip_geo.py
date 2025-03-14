@@ -51,23 +51,18 @@ for tiff_folder in tiff_folders:
 
         print(f"\nProcessing TIFF: {tiff_path}")
 
-        # 6. 读取 TIFF 文件
-
         with rasterio.open(tiff_path) as src:
             print(f"TIFF opened successfully. CRS: {src.crs}, Size: {src.width}x{src.height}")
             
-            # 7. 确保 CRS 匹配
             if grasslands_gdf.crs != src.crs:
                 print("Reprojecting GeoJSON to match TIFF CRS...")
                 grasslands_gdf = grasslands_gdf.to_crs(src.crs)
 
-            # 8. 读取波段数据并转换为 float32
             image_data = src.read(1).astype(np.float32)
 
             print(f"src...{src}")
             out_image, out_transform = mask(src, grasslands_gdf.geometry, crop=True, nodata=np.nan)
             
-            # 10. 更新元数据
             out_meta = src.meta.copy()
             out_meta.update({
                 "driver": "GTiff",
@@ -78,11 +73,9 @@ for tiff_folder in tiff_folders:
                 "nodata": 0
             })
 
-            # 11. 处理 NaN 值
             out_image = np.where(np.isnan(out_image), 0, out_image)
 
 
-        # 12. 保存裁剪后的 TIFF
         try:
             with rasterio.open(tiff_output_path, "w", **out_meta) as dest:
                 dest.write(out_image[0], 1)

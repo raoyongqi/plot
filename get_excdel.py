@@ -1,6 +1,5 @@
 import pandas as pd
 
-# Data to be converted into a DataFrame
 data = {
     "Model": [
         "QuantileRandomForest (With GridSearch)", 
@@ -14,9 +13,7 @@ data = {
     "R2": [0.31, 0.30, 0.29, 0.28, 0.28, 0.25]
 }
 
-# Create a DataFrame
 df = pd.DataFrame(data)
 
-# Save to an Excel file
 file_path = 'model_comparison.xlsx'
 df.to_excel(file_path, index=False)

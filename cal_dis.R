@@ -47,10 +47,8 @@ Biomass_count <- aggregate(Biomass ~ ID, data = df, FUN = length)
 
 PL_result <- aggregate(PL ~ ID, data = df, FUN = sum)
 
-# 合并两个数据框
 result <- merge(Biomass_result, PL_result, by = "ID")
 
-# 计算相除结果，并添加为新列
 result$Ratio <-result$PL/ result$Biomass *100
 
 result$Prefix <- sub("-[^-]*$", "",result$ID)
@@ -63,9 +61,8 @@ merged_df <- merge(result, output_df,
 
 selected_columns <- merged_df[, c("lon", "lat", "Ratio")]
 library(openxlsx)
-# 保存为Excel文件
+
 write.xlsx(selected_columns, "data/merge.xlsx")
-# 查看结果
 print(output_df)
 print(df)
 

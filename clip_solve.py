@@ -42,7 +42,6 @@ merged_df = pd.merge(cities_data, filtered_gdf, left_on='City', right_on='name',
 
 provinces_to_include = ['西藏自治区', '新疆维吾尔自治区', '甘肃省', '青海省', '四川省', '内蒙古自治区']
 
-# 过滤 merged_df，保留 Province 列在 provinces_to_include 列表中的数据
 filtered_merged_df = merged_df[merged_df['Province'].isin(provinces_to_include)]
 
 
@@ -50,7 +49,6 @@ province_gdf =  gpd.read_file('中华人民共和国.json')
 
 excluded_provinces = ['西藏自治区', '新疆维吾尔自治区', '甘肃省', '青海省', '四川省', '内蒙古自治区']
 
-# 使用 `.loc` 和 `.isin()` 来筛选出不在 excluded_provinces 列表中的省份
 filtered_province_gdf = province_gdf[~province_gdf['name'].isin(excluded_provinces)]
 
 merged_gdf = gpd.GeoDataFrame( pd.concat([filtered_merged_df, filtered_province_gdf], ignore_index=True))
@@ -115,14 +113,15 @@ for tiff_folder in tiff_folders:
                             "height": out_image.shape[1],
                             "width": out_image.shape[2],
                             "transform": out_transform,
-                            "dtype": "float32",  # 保持数据类型为浮点型
-                            "nodata": 0  # 设置 nodata 为 0
+                            "dtype": "float32",
+                            "nodata": 0
                         })
 
-                        out_image = np.where(np.isnan(out_image), 0, out_image)  # 这里将 NaN 替换为 0
+                        out_image = np.where(np.isnan(out_image), 0, out_image)
 
                         with rasterio.open(tiff_output_path, "w", **out_meta) as dest:
-                            dest.write(out_image[0], 1)  # out_image[0] 是二维数组
+                            dest.write(out_image[0], 1)
+
 
             with rasterio.open(tiff_output_path) as cropped_src:
                 for idx, row in merged_gdf.iterrows():
@@ -147,7 +146,8 @@ for tiff_folder in tiff_folders:
                                     all_pixel_values.append(pixel_value)
 
                     if all_pixel_values:
-                        avg_value = np.nanmean(all_pixel_values)  # 使用平均值来代表区域
+                        avg_value = np.nanmean(all_pixel_values)
+
                         merged_gdf.at[idx, 'value'] = avg_value
                     else:
-                        merged_gdf.at[idx, 'value'] = np.nan  # 如果没有有效值，则设置为 NaN
+                        merged_gdf.at[idx, 'value'] = np.nan

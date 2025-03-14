@@ -10,40 +10,36 @@ import seaborn as sns
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-# 1. 读取Excel文件
-# 1. 读取Excel文件
-file_path = 'data/hand_data.xlsx'  # 替换为你的文件路径
+file_path = 'data/hand_data.xlsx' 
+
 data = pd.read_excel(file_path)
-# data.drop(columns=['Province', 'City', 'District'], inplace=True)
 
 data.columns = data.columns.str.lower()
 
-# 找出所有列名中包含下划线的列，并检查前后部分是否相同
 data.columns = [col.replace('_resampled', '') if '_resampled' in col else col for col in data.columns]
 data.columns = [col.replace('wc2.1_5m_', '') if col.startswith('wc2.1_5m_') else col for col in data.columns]
+
 new_columns = []
+
 for col in data.columns:
-    if '_' in col:  # 如果列名中有下划线
-        parts = col.split('_')  # 用下划线拆分列名
-        if len(parts) > 1 and parts[0] == parts[-1]:  # 如果前后部分相同
-            # 将拆分后的第一部分和最后一部分合并
-            new_columns.append('_'.join(parts[:1]))  # 取前两个部分作为列名
-        elif len(parts) > 2 and parts[1] == parts[-1]:  # 如果前后部分相同
-            # 将拆分后的第一部分和最后一部分合并
-            new_columns.append('_'.join(parts[:2]))  # 取前两个部分作为列名
-        elif len(parts) > 3 and parts[2] == parts[-1]:  # 如果前后部分相同
-            # 将拆分后的第一部分和最后一部分合并
-            new_columns.append('_'.join(parts[:2]))  # 取前两个部分作为列名
+    if '_' in col:  
+        parts = col.split('_') 
+        if len(parts) > 1 and parts[0] == parts[-1]: 
+            
+            new_columns.append('_'.join(parts[:1]))  
+        elif len(parts) > 2 and parts[1] == parts[-1]: 
+            
+            new_columns.append('_'.join(parts[:2]))  
+        elif len(parts) > 3 and parts[2] == parts[-1]:  
+            
+            new_columns.append('_'.join(parts[:2]))  
         else:
-            new_columns.append(col)  # 否则保留原列名
+            new_columns.append(col)  
     else:
-        new_columns.append(col)  # 如果没有下划线，直接保留原列名
+        new_columns.append(col)  
 
-# 更新 DataFrame 的列名
 data.columns = new_columns
-# 2. 筛选特征列
 
-# 将所有 'prec_*' 列加总为 MAP
 data['MAP'] = data.filter(like='prec_').sum(axis=1)
 data['WIND'] = data.filter(like='wind_').mean(axis=1)
 data['MAX_MAT'] = data.filter(like='tmax_').mean(axis=1)
@@ -55,7 +51,6 @@ data['VAPR'] = data.filter(like='vapr_').mean(axis=1)
 data['TSEA'] = data['bio_4']
 data['PSEA'] =data['bio_15']
 
-# 删除 'prec_*' 列
 data = data.drop(columns=data.filter(like='prec_').columns)
 data = data.drop(columns=data.filter(like='srad_').columns)
 data = data.drop(columns=data.filter(like='tmax_').columns)
@@ -77,23 +72,19 @@ X = data[feature_columns]
 y = data['RATIO']  # 目标变量
 
 
-# 4. 分割数据集为训练集和测试集
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# 5. 初始化并训练随机森林回归模型
 rf = RandomForestRegressor(n_estimators=100, random_state=42)
 
-# 6. 使用 Boruta 进行特征选择
 feat_selector = BorutaPy(rf, n_estimators='auto',max_iter=10, alpha=0.05, random_state=42, verbose=2)
-# # 7. 获取重要特征并选择前17个
 
 feat_selector.fit(X_train.values, y_train.values)
-# 按照ranking_的顺序排序特征名
+
 sorted_features = [feature for _, feature in sorted(zip(feat_selector.ranking_, feature_columns))]
 
 
 X = data[[*sorted_features[:16]]]
-y =  data['RATIO']  # 目标变量  # 替换为你的目标变量
+y =  data['RATIO'] 
 
 rf = RandomForestRegressor(random_state=42)
 
@@ -124,7 +115,6 @@ category_dict = {
     'TSEA': 'Climate',
     'PSEA': 'Climate',
     'HAND': 'Geography',
-
     'MAP': 'Climate',
     'AVG MAT': 'Climate',
     'MIN MAT': 'Climate',
@@ -154,8 +144,10 @@ with open(output_file, "w") as f:
 
 
 output_file = "feature_importance1.xlsx"
+
+
 importance_df.to_excel(output_file, float_format="%.2f",index=False)
-# # 8. 使用选择的特征重新训练模型
+
 # X_train_filtered = X_train[top_17_features]
 # X_test_filtered = X_test[top_17_features]
 
